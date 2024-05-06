@@ -1,9 +1,4 @@
 
-
-
-
--->_< 5nk6
-
  local function getnamecall()
     local placeId = game.PlaceId
     
@@ -16,102 +11,142 @@
     end
 end
 
- 
- local namecalltype = getnamecall()
- 
- function MainEventLocate()
+local namecalltype = getnamecall()
+
+function MainEventLocate()
     for _,v in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
         if v.Name == "MainEvent" then
             return v
         end
     end
- end
- 
- local mainevent = MainEventLocate()
- 
- -- // Shorthand
- local uwuDNS = getgenv().DNS
- local uwuMain = uwuDNS.General
- local uwuCamMain = uwuDNS.Camlock.Main
- local uwuCamFOV = uwuDNS.Camlock.FOV
- local uwuSilentMain = uwuDNS.Silent.Main
- local uwuSilentFOV = uwuDNS.Silent.FOV
- local uwuTrace = uwuDNS.Tracer
- local uwuAutoPred = uwuDNS.AutoPrediction
- 
- -- // Optimization
- local vect3 = Vector3.new
- local vect2 = Vector2.new
- local cnew = CFrame.new
- 
- -- // Libraries
- local NotificationHolder = loadstring(game:HttpGet("https://raw.githubusercontent.com/BocusLuke/UI/main/STX/Module.Lua"))()
- local Notification = loadstring(game:HttpGet("https://raw.githubusercontent.com/BocusLuke/UI/main/STX/Client.Lua"))()
- 
- -- // Services
- local uis = game:GetService("UserInputService")
- local rs = game:GetService("RunService")
- local plrs = game:GetService("Players")
- local ws = game:GetService("Workspace")
- 
- -- // Script Variables
- local CToggle = false
- local lplr = plrs.LocalPlayer
- local CTarget = nil
- local CPart = nil
- local SToggle = false
- local STarget = nil
- local SPart = nil
- 
- -- // Client Variables
- local m = lplr:GetMouse()
- local c = ws.CurrentCamera
- 
- -- // Notification Function
- local function SendNotification(text)
+end
+
+-- 360 on bind made by prime >_<
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local Toggle = getgenv().DNS.Key360.Toggle
+local RotationSpeed = getgenv().DNS.Key360.RotationSpeed
+local Keybind = getgenv().DNS.Key360.Keybind
+
+local function OnKeyPress(Input, GameProcessedEvent)
+    if Input.KeyCode == Keybind and not GameProcessedEvent then 
+        Toggle = not Toggle
+    end
+end
+
+UserInputService.InputBegan:Connect(OnKeyPress)
+
+local LastRenderTime = 0
+local FullCircleRotation = 2 * math.pi
+local TotalRotation = 0
+
+local function RotateCamera()
+    if Toggle then
+        local CurrentTime = tick()
+        local TimeDelta = math.min(CurrentTime - LastRenderTime, 0.01)
+        LastRenderTime = CurrentTime
+
+        local Rotation = CFrame.fromAxisAngle(Vector3.new(0, 1, 0), math.rad(RotationSpeed * TimeDelta))
+        Camera.CFrame = Camera.CFrame * Rotation
+
+        TotalRotation = TotalRotation + math.rad(RotationSpeed * TimeDelta)
+        if TotalRotation >= FullCircleRotation then
+            Toggle = false
+            TotalRotation = 0
+        end
+    end
+end
+
+RunService.RenderStepped:Connect(RotateCamera)
+
+
+local mainevent = MainEventLocate()
+
+-- // Shorthand
+local uwuDNS = getgenv().DNS
+local uwuMain = uwuDNS.General
+local uwuCamMain = uwuDNS.Camlock.Main
+local uwuCamFOV = uwuDNS.Camlock.FOV
+local uwuSilentMain = uwuDNS.Silent.Main
+local uwuSilentFOV = uwuDNS.Silent.FOV
+local uwuTrace = uwuDNS.Tracer
+local uwuAutoPred = uwuDNS.AutoPrediction
+
+-- // Optimization
+local vect3 = Vector3.new
+local vect2 = Vector2.new
+local cnew = CFrame.new
+
+-- // Libraries
+local NotificationHolder = loadstring(game:HttpGet("https://raw.githubusercontent.com/BocusLuke/UI/main/STX/Module.Lua"))()
+local Notification = loadstring(game:HttpGet("https://raw.githubusercontent.com/BocusLuke/UI/main/STX/Client.Lua"))()
+
+-- // Services
+local uis = game:GetService("UserInputService")
+local rs = game:GetService("RunService")
+local plrs = game:GetService("Players")
+local ws = game:GetService("Workspace")
+
+-- // Script Variables
+local CToggle = false
+local lplr = plrs.LocalPlayer
+local CTarget = nil
+local CPart = nil
+local SToggle = false
+local STarget = nil
+local SPart = nil
+
+-- // Client Variables
+local m = lplr:GetMouse()
+local c = ws.CurrentCamera
+
+-- // Notification Function
+local function SendNotification(text)
     Notification:Notify(
-        {Title = "DNS Rewrite", Description = "pl#0001 - "..text},
-        {OutlineColor = Color3.fromRGB(50,76,110),Time = 2, Type = "image"},
-        {Image = "http://www.roblox.com/asset/?id=6023426923", ImageColor = Color3.fromRGB(50,76,110)}
+        {Title = ">_<", Description = "DNS - "..text},
+        {OutlineColor = Color3.fromRGB(255,215,0),Time = 2, Type = "image"},
+        {Image = "http://www.roblox.com/asset/?id=6023426923", ImageColor = Color3.fromRGB(255,215,0)}
     )
- end 
- 
- -- // Call notification function
- if uwuMain.Notifications then
-    SendNotification("pl#0001 - injecting DNS Rewrite")
+end 
+
+-- // Call notification function
+if uwuMain.Notifications then
+    SendNotification("INJECTING")
     wait(3.5)
-    SendNotification("pl#0001 - finished injecting DNS Rewrite")
- end
- 
- -- // Camlock FOV
- local CamlockFOV = Drawing.new("Circle")
- CamlockFOV.Visible = uwuCamFOV.ShowFOV
- CamlockFOV.Thickness = 1
- CamlockFOV.NumSides = 30
- CamlockFOV.Radius = uwuCamFOV.Radius * 3
- CamlockFOV.Color = uwuCamFOV.Color
- CamlockFOV.Filled = uwuCamFOV.Filled
- CamlockFOV.Transparency = uwuCamFOV.Transparency
- 
- --Silent FOV
- local SilentFOV = Drawing.new("Circle")
- SilentFOV.Visible = uwuSilentFOV.ShowFOV
- SilentFOV.Thickness = 1
- SilentFOV.NumSides = 30
- SilentFOV.Radius = uwuSilentFOV.Radius * 3
- SilentFOV.Color = uwuSilentFOV.Color
- SilentFOV.Filled = uwuSilentFOV.Filled
- SilentFOV.Transparency = uwuSilentFOV.Transparency
- 
- --Tracer
- local Line = Drawing.new("Line")
- Line.Color = uwuTrace.Color
- Line.Transparency = uwuTrace.Transparency
- Line.Thickness = 1
- Line.Visible = uwuTrace.Visible
- 
- -- // Script Functions
- local function uwuFindTawget() -- // Find target
+    SendNotification("INJECTED")
+end
+
+-- // Camlock FOV
+local CamlockFOV = Drawing.new("Circle")
+CamlockFOV.Visible = uwuCamFOV.ShowFOV
+CamlockFOV.Thickness = 1
+CamlockFOV.NumSides = 30
+CamlockFOV.Radius = uwuCamFOV.Radius * 3
+CamlockFOV.Color = uwuCamFOV.Color
+CamlockFOV.Filled = uwuCamFOV.Filled
+CamlockFOV.Transparency = uwuCamFOV.Transparency
+
+--Silent FOV
+local SilentFOV = Drawing.new("Circle")
+SilentFOV.Visible = uwuSilentFOV.ShowFOV
+SilentFOV.Thickness = 1
+SilentFOV.NumSides = 30
+SilentFOV.Radius = uwuSilentFOV.Radius * 3
+SilentFOV.Color = uwuSilentFOV.Color
+SilentFOV.Filled = uwuSilentFOV.Filled
+SilentFOV.Transparency = uwuSilentFOV.Transparency
+
+--Tracer
+local Line = Drawing.new("Line")
+Line.Color = uwuTrace.Color
+Line.Transparency = uwuTrace.Transparency
+Line.Thickness = 1
+Line.Visible = uwuTrace.Visible
+
+-- // Script Functions
+local function uwuFindTawget() -- // Find target
     local d, t = math.huge, nil
     for _,v in pairs (plrs:GetPlayers()) do
         local _,os = c:WorldToViewportPoint(v.Character.PrimaryPart.Position)
@@ -125,9 +160,9 @@ end
         end
     end
     return t
- end
- 
- local function uwuFindPart() -- // Find aimpart
+end
+
+local function uwuFindPart() -- // Find aimpart
     local d, p = math.huge, nil
     if CTarget then
         for _,v in pairs(CTarget.Character:GetChildren()) do
@@ -142,9 +177,9 @@ end
         end
         return p.Name
     end
- end
- 
- local function uwuFindSilentPart() -- // Find aimpart
+end
+
+local function uwuFindSilentPart() -- // Find aimpart
     local d, p = math.huge, nil
     if CTarget then
         for _,v in pairs(CTarget.Character:GetChildren()) do
@@ -159,9 +194,9 @@ end
         end
         return p.Name
     end
- end
- 
- local function uwuCheckAnti(targ) -- // Anti-aim detection
+end
+
+local function uwuCheckAnti(targ) -- // Anti-aim detection
     if (targ.Character.HumanoidRootPart.Velocity.Y < -5 and targ.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Freefall) or targ.Character.HumanoidRootPart.Velocity.Y < -50 then
         return true
     elseif targ and (targ.Character.HumanoidRootPart.Velocity.X > 35 or targ.Character.HumanoidRootPart.Velocity.X < -35) then
@@ -173,9 +208,9 @@ end
     else
         return false
     end
- end
- 
- local function InSilentRadiuwus(target, section, fov) -- // Check if player is in the fov
+end
+
+local function InSilentRadiuwus(target, section, fov) -- // Check if player is in the fov
     if target then
         local pos = nil
         if not uwuCheckAnti(target) then
@@ -190,9 +225,9 @@ end
             return false
         end
     end
- end
- 
- local function Silent()
+end
+
+local function Silent()
     if STarget then
         if SPart and InSilentRadiuwus(STarget, uwuSilentMain, SilentFOV.Radius) then
             if not uwuCheckAnti(STarget) then
@@ -202,10 +237,10 @@ end
             end
         end
     end
- end
- 
- 
- local function InRadiuwus(target, section, fov) -- // Check if player is in the fov
+end
+
+
+local function InRadiuwus(target, section, fov) -- // Check if player is in the fov
     if target then
         if uwuCamFOV.UseFOV then
             local pos = nil
@@ -224,9 +259,9 @@ end
             return true
         end
     end
- end
- 
- uis.InputBegan:Connect(function(k,t)
+end
+
+uis.InputBegan:Connect(function(k,t)
     if not t then
         if k.KeyCode == Enum.KeyCode[uwuCamMain.Key:upper()] then
             CToggle = true
@@ -256,9 +291,9 @@ end
             end
         end
     end
- end)
- 
- rs.RenderStepped:Connect(function()
+end)
+
+rs.RenderStepped:Connect(function()
     if CTarget then
         CPart = uwuFindPart()
         local pos = nil
@@ -339,9 +374,9 @@ end
         SilentFOV.Position = vect2(m.X, m.Y + 36)
         Line.Visible = false
     end
- end)
- 
- lplr.Character.ChildAdded:Connect(function(tool)
+end)
+
+lplr.Character.ChildAdded:Connect(function(tool)
     if tool:IsA("Tool") then
         tool.Activated:connect(function()
             if uwuSilentMain.Mode == "Regular" then
@@ -367,9 +402,9 @@ end
             end
         end)
     end
- end)
- 
- lplr.CharacterAdded:Connect(function(char)
+end)
+
+lplr.CharacterAdded:Connect(function(char)
     char.ChildAdded:Connect(function(tool)
         tool.Activated:connect(function()
             if uwuSilentMain.Mode == "Regular" then
@@ -395,10 +430,10 @@ end
             end
         end)
     end)
- end)
- 
- --Auto Prediction
- coroutine.resume(coroutine.create(function()
+end)
+
+--Auto Prediction
+coroutine.resume(coroutine.create(function()
     while true do
         if uwuAutoPred.Enabled then
             local ping = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
@@ -440,4 +475,4 @@ end
             task.wait(0.7)
         end
     end
- end))
+end))
