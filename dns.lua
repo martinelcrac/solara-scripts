@@ -1,4 +1,4 @@
-
+--5nk6
  local function getnamecall()
     local placeId = game.PlaceId
     
